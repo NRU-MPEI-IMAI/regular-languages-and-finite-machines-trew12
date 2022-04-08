@@ -1,0 +1,838 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{morewrites}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[pdf]{graphviz}
+\usepackage{xpatch}
+\usepackage[left=1cm, right=1cm, top=2cm, bottom=2cm, bindingoffset=0cm]{geometry}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{% argument=file name and extension
+  \typeout{(#1)}
+  \@addtofilelist{#1}
+  \IfFileExists{#1}{}{\typeout{No file #1.}}
+}
+\makeatother
+\xpretocmd{\digraph}{\addFileDependency{#2.dot}}{}{}
+
+\title{Регулярные языки и конечные автоматы}
+\author{Антон Володин, гр. А-05-19}
+\date{Март 2022}
+
+\begin{document}
+
+\maketitle
+
+\section{Задание №1. Построить конечный автомат, распознающий язык}
+Ответом на данное задание является конечный автомат, распознающий описанный язык. Автомат должен быть детерминированным.
+\begin{enumerate}
+  \item $L = \{w \in \{a, b, c\}^*| \left| w \right|_c = 1 \}$ \\
+  
+    \digraph[scale=0.7]{i1p1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q2;
+        node [shape = circle];
+        start -> q1;
+        q1 -> q2 [label = "c"];
+        q1 -> q1 [label = "a, b"];
+        q2 -> q2 [label = "a, b"];
+    } \\
+  
+  \item $L = \{w \in \{a, b\}^*| \left| w \right|_a \leq 2, \left| w \right|_b \geq 2 \}$ \\
+  
+    \digraph[scale=0.8]{i1p2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q22, q02, q12;
+        node [shape = circle];
+        start -> q00;
+        q00 -> q10 [label = "a"];
+        q00 -> q01 [label = "b"];
+        q10 -> q20 [label = "a"];
+        q10 -> q11 [label = "b"];
+        q01 -> q11 [label = "a"];
+        q01 -> q02 [label = "b"];
+        q20 -> q21 [label = "b"];
+        q11 -> q21 [label = "a"];
+        q11 -> q12 [label = "b"];
+        q02 -> q12 [label = "a"];
+        q02 -> q02 [label = "b"];
+        q21 -> q22 [label = "b"];
+        q12 -> q22 [label = "a"];
+        q12 -> q12 [label = "b"];
+        q22 -> q22 [label = "b"];
+    } \\
+  
+  \item $L = \{w \in \{a, b\}^*| \left| w \right|_a \neq \left| w \right|_b \}$\\
+    Язык не является регулярным, поэтому невозможно построить ДКА.
+    
+    
+  \item $L = \{w \in \{a, b\}^* | \ ww = w w w \}$ \\
+  Подходит только пустой язык. \\
+  
+    \digraph[scale=0.7]{i1p4graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q1;
+        node [shape = circle];
+        start -> q1;
+    } \\
+  
+\end{enumerate}
+
+\section {Задание №2. Построить конечный автомат, используя прямое произведение}
+Ответом на данное задание является конечный автомат, распознающий описанный язык. Требуется, чтобы он был построен при помощи прямого произведения ДКА и его свойств.
+
+\begin{enumerate}
+  \item $L_1 = \{w \in \{a, b\}^*| \left| w \right|_a \geq 2 \land     \left| w \right|_b \geq 2\}$ \\
+    ДКА, распознающий язык $L_{11} = \{w \in \{a, b\}^*| \left| w \right|_a \geq 2 \}$ \\
+  
+    \digraph[scale=0.7]{i2p1s1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q3;
+        node [shape = circle];
+        start -> q1;
+        q1 -> q2 [label = "a"];
+        q1 -> q1 [label = "b"]
+        q2 -> q3 [label = "a"];
+        q2 -> q2 [label = "b"];
+        q3 -> q3 [label = "a,b"]
+    } \\
+  
+    ДКА, распознающий язык $L_{12} = \{w \in \{a, b\}^*| \left| w \right|_b \geq 2\}$ \\
+  
+    \digraph[scale=0.7]{i2p1s2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q6;
+        node [shape = circle];
+        start -> q4;
+        q4 -> q5 [label = "b"];
+        q4 -> q4 [label = "a"]
+        q5 -> q6 [label = "b"];
+        q5 -> q5 [label = "a"];
+        q6 -> q6 [label = "a, b"]
+    } \\
+  
+    $L_1 = L_{11} \times L_{12}$ \\
+    $\Sigma=\{a,b\}$ \\
+    $Q = \{q1q4, q1q5, q1q6, q2q4, q2q5, q2q6, q3q4, q3q5, q3q6\}$ \\
+    $S = \{q1q4\}$ \\
+    $T = \{q3q6\}$ \\
+    \begin{tabular} {l l l}
+        $\delta (q1q4, a) = q2q4 $ & $\delta (q1q4, b) = q1q5$ & $\delta (q1q5, a) = q2q5$ \\ 
+        $\delta (q1q5, b) = q1q6$ & $\delta (q1q6, a) = q2q6$ & $\delta (q1q6, b) = q1q6 $ \\ $\delta (q2q4, a) = q3q4$ & $\delta (q2q4, b) = q2q5$ & $\delta (q2q5, a) = q3q5$ \\ 
+        $\delta (q2q5, b) = q2q6$ & $\delta (q2q6, a) = q3q6$ & $\delta (q2q6, b) = q2q6$ \\ $\delta (q3q4, a) = q3q4$ & $\delta (q3q4, b)= q3q5$ & $\delta (q3q5, a) = q3q5 $\\ 
+        $\delta (q3q5, b) = q3q6$  & $\delta (q3q6, a) = q3q6$ & $\delta (q3q6, b) = q3q6 $
+    \end{tabular}\\
+  
+    \digraph[scale=0.7]{i2p1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q3q6;
+        node [shape = circle];
+        start -> q1q4;
+        q1q4 -> q2q4 [label = "a"];
+        q1q4 -> q1q5 [label = "b"];
+        q1q5 -> q2q5 [label = "a"];
+        q1q5 -> q1q6 [label = "b"];
+        q1q6 -> q2q6 [label = "a"];
+        q1q6 -> q1q6 [label = "b"];
+        q2q4 -> q3q4 [label = "a"];
+        q2q4 -> q2q5 [label = "b"];
+        q2q5 -> q3q5 [label = "a"];
+        q2q5 -> q2q6 [label = "b"];
+        q2q6 -> q3q6 [label = "a"];
+        q2q6 -> q2q6 [label = "b"];
+        q3q4 -> q3q4 [label = "a"];
+        q3q4 -> q3q5 [label = "b"];
+        q3q5 -> q3q5 [label = "a"];
+        q3q5 -> q3q6 [label = "b"];
+        q3q6 -> q3q6 [label = "a, b"];
+  }
+  
+  
+  
+  
+  
+  \item $L_2 = \{w \in \{a, b\}^*| \left| w \right| \geq 3 \land \left| w \right| \text{нечётное} \}$ \\
+  
+      ДКА, распознающий язык $L_{21} = \{w \in \{a, b\}^*| \left| w \right| \geq 3 \}$ \\
+  
+    \digraph[scale=0.7]{i2p2s1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q4;
+        node [shape = circle];
+        start -> q1;
+        q1 -> q2 [label = "a,b"];
+        q2 -> q3 [label = "a,b"];
+        q3 -> q4 [label = "a,b"];
+        q4 -> q4 [label = "a,b"]
+    } \\
+  
+      ДКА, распознающий язык $L_{22} = \{w \in \{a, b\}^*| \left| w \right| \text{нечётное}\}$ \\
+  
+    \digraph[scale=0.7]{i2p2s2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q6;
+        node [shape = circle];
+        start -> q5;
+        q5 -> q6 [label = "a,b"];
+        q6 -> q5 [label = "a,b"];
+    }\\
+  
+    $L_2 = L_{21} \times L_{22}$ \\
+    $\Sigma=\{a,b\}$ \\
+    $Q = \{q1q5, q1q6, q2q5, q2q6, q3q5, q3q6, q4q5, q4q6\}$ \\
+    $S = \{q1q5\}$ \\
+    $T = \{q4q6$\} \\
+    \begin{tabular} {l l l}
+        $\delta (q1q5, a) =  q2q6 $& $\delta (q1q5, b) = q2q6$ & $\delta (q1q6, a) = q2q5$ \\ 
+        $\delta (q1q6, b) = q2q5$ & $\delta (q2q5, a) = q3q6$ & $\delta (q2q5, b) = q3q6$ \\ $\delta (q3q5, a) =  q4q6$ & $\delta (q3q5, b) = q4q6$ & $\delta (q3q6, a) = q4q5$ \\ 
+        $\delta (q3q6, b) =  q4q5$ & $\delta (q4q5, a) =  q4q6$ & $\delta (q4q6, b) =  q4q6$\\ 
+    \end{tabular} \\
+  
+    \digraph[scale=0.7]{i2p2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q4q6;
+        node [shape = circle];
+        start -> q1q5;
+        q1q5 -> q2q6 [label = "a,b"];
+        q1q6 -> q2q5 [label = "a,b"];
+        q2q5 -> q3q6 [label = "a,b"];
+        q2q6 -> q3q5 [label = "a,b"];
+        q3q5 -> q4q6 [label = "a,b"];
+        q3q6 -> q4q5 [label = "a,b"];
+        q4q5 -> q4q6 [label = "a,b"];
+        q4q6 -> q4q5 [label = "a,b"];
+    } \\
+  
+    Вершины q1q6, q2q5, q3q6 можно удалить, поскольку они недостижимы
+  
+      
+      \item  $L_3 = \{w \in \{a, b\}^*| \left| w \right|_a \text{чётно} \land \left| w \right|_b \text{кратно трём} \}$ \\
+      
+      ДКА, распознающий язык $L_{31} = \{w \in \{a, b\}^*| \left| w \right|_a \text{чётно} \}$ \\
+  
+    \digraph[scale=0.7]{i2p3s1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q1;
+        node [shape = circle];
+        start -> q1;
+        q1 -> q2 [label = "a"];
+        q1 -> q1 [label = "b"];
+        q2 -> q1 [label = "a"];
+        q2 -> q2 [label = "b"];
+    } \\
+  
+      ДКА, распознающий язык $L_{32} = \{w \in \{a, b\}^*| \left| w \right|_b \text{кратно трём}\}$ \\
+  
+    \digraph[scale=0.7]{i2p3s2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q3;
+        node [shape = circle];
+        start -> q3;
+        q3 -> q3 [label = "a"];
+        q3 -> q4 [label = "b"];
+        q4 -> q4 [label = "a"];
+        q4 -> q5 [label = "b"];
+        q5 -> q5 [label = "a"];
+        q5 -> q3 [label = "b"];
+    }\\
+  
+      $L_3 = L_{31} \times L_{32}$ \\
+      $\Sigma=\{a,b\}$ \\
+      $Q = \{q1q3, q1q4, q1q5, q2q3, q2q4, q2q5\}$ \\
+      $S = \{q1q3\}$ \\
+      $T = \{q1q3$\} \\
+  
+      \begin{tabular} {l l l}
+          $\delta (q1q3, a) = q2q3$ & $\delta (q1q3, b) =  q1q4$ & $\delta (q1q4, a) = q2q4$\\ 
+          $\delta (q1q4, b) = q1q5$ & $\delta (q1q5, a) = q2q5$ & $\delta (q1q5, b) =  q1q3$\\ $\delta (q2q3, a) =  q1q3$ & $\delta (q2q3, b) = q2q4$ & $\delta (q2q4, a) = q1q4$\\ 
+          $\delta (q2q4, b) = q2q5$ & $\delta (q2q5, a) = q1q5$ & $\delta (q2q5, b) =  q2q3$\\ 
+      \end{tabular}\\
+  
+    \digraph[scale=0.6]{i2p3graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q1q3;
+        node [shape = circle];
+        start -> q1q3;
+        q1q3 -> q2q3 [label = "a"];
+        q1q3 -> q1q4 [label = "b"];
+        q1q4 -> q2q4 [label = "a"];
+        q1q4 -> q1q5 [label = "b"];
+        q1q5 -> q2q5 [label = "a"];
+        q1q5 -> q1q3 [label = "b"];
+        q2q3 -> q1q3 [label = "a"];
+        q2q3 -> q2q4 [label = "b"];
+        q2q4 -> q1q4 [label = "a"];
+        q2q4 -> q2q5 [label = "b"];
+        q2q5 -> q1q5 [label = "a"];
+        q2q5 -> q2q3 [label = "b"];
+  } \\
+  
+  
+  
+  
+  \item $L_4 = \overline{L_3}$ \\
+  
+      $\Sigma=\{a,b\}$ \\
+      $Q = \{q1q3, q1q4, q1q5, q2q3, q2q4, q2q5\}$ \\
+      $S = \{q1q3\}$ \\
+      $T = \{q1q4, q1q5, q2q3, q2q4, q2q5$\} \\
+ 
+    \digraph[scale=0.6]{i2p4graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q1q4, q1q5, q2q3, q2q4, q2q5;
+        node [shape = circle];
+        start -> q1q3;
+        q1q3 -> q2q3 [label = "a"];
+        q1q3 -> q1q4 [label = "b"];
+        q1q4 -> q2q4 [label = "a"];
+        q1q4 -> q1q5 [label = "b"];
+        q1q5 -> q2q5 [label = "a"];
+        q1q5 -> q1q3 [label = "b"];
+        q2q3 -> q1q3 [label = "a"];
+        q2q3 -> q2q4 [label = "b"];
+        q2q4 -> q1q4 [label = "a"];
+        q2q4 -> q2q5 [label = "b"];
+        q2q5 -> q1q5 [label = "a"];
+        q2q5 -> q2q3 [label = "b"];
+    } \\
+  
+  \item $L_5 = L_2 \setminus L_3$ \\
+    $L_5 = L_2 \setminus L_3 = L_2 \times L_4$ \\
+    Перенумеруем вершины в графе $L_2$ и удалим лишние\\
+    \digraph[scale=0.7]{i2p5s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q4;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label = "a,b"];
+            q2 -> q3 [label = "a,b"];
+            q3 -> q4 [label = "a,b"];
+            q5 -> q4 [label = "a,b"];
+            q4 -> q5 [label = "a,b"];
+    } \\
+    Перенумеруем вершины в графе $L_4$ \\
+  
+    \digraph[scale=0.6]{i2p5s2graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q8, q10, q7, q9, q11;
+        node [shape = circle];
+        start -> q6;
+        q6 -> q7 [label = "a"];
+        q6 -> q9 [label = "b"];
+        q9 -> q8 [label = "a"];
+        q9 -> q10 [label = "b"];
+        q10 -> q11 [label = "a"];
+        q10 -> q6 [label = "b"];
+        q7 -> q6 [label = "a"];
+        q7 -> q8 [label = "b"];
+        q8 -> q9 [label = "a"];
+        q8 -> q11 [label = "b"];
+        q11 -> q10 [label = "a"];
+        q11 -> q7 [label = "b"];
+    } \\
+  
+  
+    $Q = \{q1q6, q1q7, q1q8, q1q9, q1q10, q1q11,
+             q2q6, q2q7, q2q8, q2q9, q2q10, q2q11,\\
+             q3q6, q3q7, q3q8, q3q9, q3q10, q3q11,
+             q3q6, q4q7, q4q8, q4q9, q4q10, q4q11,
+             q5q6, \\ q5q7, q5q8, q5q9, q5q10, q5q11\}$ \\
+    $S = \{q1q6\}$ \\
+    $T = \{q4q7, q4q8, q4q9, q4q10, q4q11$\} \\
+    \begin{tabular} {l l l}
+        $\delta (q1q6, a) = q2q7 $ & $\delta (q1q6, b) =  q2q9$ & $\delta (q1q7, a) = q2q6$\\ 
+        $\delta (q1q7, b) =q2q8 $ & $\delta (q1q8, a) = q2q9$ & $\delta (q1q8, b) = q2q11 $\\ $\delta (q1q9, a) =q2q8  $ & $\delta (q1q9, b) = q2q10$ & $\delta (q1q10, a) = q2q11$\\ 
+        $\delta (q1q10, b) = q2q6$ & $\delta (q1q11, a) = q2q10$ & $\delta (q1q11, b) = q2q7 $\\ 
+        $\delta (q2q6, a) = q3q7 $ & $\delta (q2q6, b) = q3q9  $ & $\delta (q2q7, a) = q3q6 $\\ 
+        $\delta (q2q7, b) = q3q8 $ & $\delta (q2q8, a) = q3q9 $ & $\delta (q2q8, b) =  q3q11 $\\ $\delta (q2q9, a) =  q3q8 $ & $\delta (q2q9, b) = q3q10 $ & $\delta (q2q10, a) = q3q11 $\\ 
+        $\delta (q2q10, b) = q3q6 $ & $\delta (q2q11, a) = q3q10 $ & $\delta (q2q11, b) = q3q7 $\\ 
+        $\delta (q3q6, a) = q4q7 $ & $\delta (q3q6, b) = q4q9  $ & $\delta (q3q7, a) = q4q6 $\\ 
+        $\delta (q3q7, b) = q4q8 $ & $\delta (q3q8, a) = q4q9 $ & $\delta (q3q8, b) =  q4q11 $\\ $\delta (q3q9, a) =  q4q8 $ & $\delta (q3q9, b) = q4q10 $ & $\delta (q3q10, a) = q4q11 $\\ 
+        $\delta (q3q10, b) = q4q6 $ & $\delta (q3q11, a) = q4q10 $ & $\delta (q3q11, b) = q4q7 $\\ 
+        $\delta (q4q6, a) = q5q7 $ & $\delta (q4q6, b) = q5q9  $ & $\delta (q4q7, a) = q5q6 $\\ 
+        $\delta (q4q7, b) = q5q8 $ & $\delta (q4q8, a) = q5q9 $ & $\delta (q4q8, b) =  q5q11 $\\ $\delta (q4q9, a) =  q5q8 $ & $\delta (q4q9, b) = q5q10 $ & $\delta (q4q10, a) = q5q11 $\\ 
+        $\delta (q4q10, b) = q5q6 $ & $\delta (q4q11, a) = q5q10 $ & $\delta (q4q11, b) = q5q7 $\\ 
+        $\delta (q5q6, a) = q4q7 $ & $\delta (q5q6, b) = q4q9  $ & $\delta (q5q7, a) = q4q6 $\\ 
+        $\delta (q5q7, b) = q4q8 $ & $\delta (q5q8, a) = q4q9 $ & $\delta (q5q8, b) =  q4q11 $\\ $\delta (q5q9, a) =  q4q8 $ & $\delta (q5q9, b) = q4q10 $ & $\delta (q5q10, a) = q4q11 $\\ 
+        $\delta (q5q10, b) = q4q6 $ & $\delta (q5q11, a) = q4q10 $ & $\delta (q5q11, b) = q4q7 $\\ 
+    \end{tabular}\\
+
+    \digraph[scale=0.33]{i2p5graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q4q7, q4q8, q4q9, q4q10, q4q11;
+        node [shape = circle];
+        start -> q1q6;
+         q1q6 -> q2q7[label = "a"];
+         q1q6 ->  q2q9 [label = "b"];      
+         q1q7 -> q2q6 [label = "a"];
+         q1q7 ->q2q8 [label = "b"];
+         q1q8 -> q2q9 [label = "a"];   
+         q1q8 -> q2q11 [label = "b"];      
+         q1q9 ->q2q8 [label = "a"];        
+         q1q9 -> q2q10 [label = "b"];     
+         q1q10 -> q2q11 [label = "a"];  
+         q1q10 -> q2q6 [label = "b"];      
+         q1q11 -> q2q10 [label = "a"];      
+         q1q11 -> q2q7 [label = "b"];   
+         q2q6 -> q3q7 [label = "a"];      
+         q2q6 -> q3q9 [label = "b"];       
+         q2q7 -> q3q6 [label = "a"];   
+         q2q7 -> q3q8 [label = "b"];       
+         q2q8 -> q3q9 [label = "a"];       
+         q2q8 ->  q3q11 [label = "b"];     
+         q2q9 ->  q3q8 [label = "a"];      
+         q2q9 -> q3q10 [label = "b"];     
+         q2q10 -> q3q11 [label = "a"];   
+         q2q10 -> q3q6 [label = "b"];      
+         q2q11 -> q3q10 [label = "a"];       
+         q2q11 -> q3q7 [label = "b"];    
+         q3q6 -> q4q7 [label = "a"];       
+         q3q6 -> q4q9 [label = "b"];        
+         q3q7 -> q4q6 [label = "a"];   
+         q3q7 -> q4q8 [label = "b"];      
+         q3q8 -> q4q9 [label = "a"];       
+         q3q8 ->  q4q11 [label = "b"];      
+         q3q9 ->  q4q8 [label = "a"];       
+         q3q9 -> q4q10 [label = "b"];      
+         q3q10 -> q4q11 [label = "a"];   
+         q3q10 -> q4q6 [label = "b"];      
+         q3q11 -> q4q10 [label = "a"];       
+         q3q11 -> q4q7 [label = "b"];   
+         q4q6 -> q5q7 [label = "a"];      
+         q4q6 -> q5q9 [label = "b"];      
+         q4q7 -> q5q6 [label = "a"];   
+         q4q7 -> q5q8 [label = "b"];      
+         q4q8 -> q5q9 [label = "a"];      
+         q4q8 ->  q5q11 [label = "b"];      
+         q4q9 ->  q5q8 [label = "a"];       
+         q4q9 -> q5q10 [label = "b"];       
+         q4q10 -> q5q11 [label = "a"];   
+         q4q10 -> q5q6 [label = "b"];      
+         q4q11 -> q5q10 [label = "a"];      
+         q4q11 -> q5q7 [label = "b"];    
+         q5q6 -> q4q7 [label = "a"];      
+         q5q6 -> q4q9 [label = "b"];        
+         q5q7 -> q4q6 [label = "a"];   
+         q5q7 -> q4q8 [label = "b"];       
+         q5q8 -> q4q9 [label = "a"];       
+         q5q8 ->  q4q11 [label = "b"];      
+         q5q9 ->  q4q8 [label = "a"];       
+         q5q9 -> q4q10 [label = "b"];      
+         q5q10 -> q4q11 [label = "a"];   
+         q5q10 -> q4q6 [label = "b"];      
+         q5q11 -> q4q10 [label = "a"];       
+         q5q11 -> q4q7 [label = "b"];   
+    }
+\end{enumerate}
+
+\section {Задание №3. Построить минимальный ДКА по регулярному выражению}
+Ответом на данное задание является минимальный ДКА, который допускает тот же язык, что описывается регулярным выражением.
+\begin{enumerate}
+    \item $(ab+aba)^*a$
+    
+        \digraph[scale=0.7]{i3p1s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label= "a"];
+            q1 -> q3 [label="a"];
+            q3 -> q1 [label="b"];
+            q3 -> q4 [label="b"];
+            q4 -> q1 [label="a"];
+        } \\
+    
+        Приведем НКА к ДКА. \\
+        \begin{tabular} {|c|c|c|}
+            \hline
+            &a&b \\ \hline
+            q1 & q2q3 & \\
+            q2q3 &  & q1q4\\
+            q1q4 & q1q2q3& \\
+            q1q2q3 & q2q3& q1q4\\
+            \hline
+        \end{tabular}\\
+    
+        \digraph[scale=0.7]{i3p1s2graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2q3, q1q2q3;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2q3 [label= "a"];
+            q2q3 -> q1q4 [label="b"];
+            q1q4 -> q1q2q3 [label="a"];
+            q1q2q3 -> q2q3 [label="a"];
+            q1q2q3 -> q1q4 [label="b"];
+        } \\
+    
+        $k_0 : (q1, q1q4), (q2q3, q1q2q3)$ \\
+        $k_1 : (q1, q1q4), (q2q3), (q1q2q3)$ \\
+        $k_2 : (q1), (q1q4), (q2q3), (q1q2q3)$ \\
+        Автомат минимален \\
+    
+    \item $a(a(ab)^*b)^*(ab)^*$
+        \digraph[scale=0.7]{i3p2s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2, q3;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label= "a"];
+            q2 -> q3 [label="a"];
+            q3 -> q2 [label="b"];
+            q2 -> q4 [label="a"];
+            q4 -> q2 [label="b"];
+            q4 -> q5 [label="a"];
+            q5 -> q4 [label="b"];
+        } \\
+        
+        Приведем НКА к ДКА. \\
+        
+        \begin{tabular} {|c|c|c|}
+            \hline
+            &a&b \\ \hline
+            q1 & q2 & \\
+            q2 & q3q4 & \\
+            q3q4 & q5 & q2\\
+            q5 & & q4\\
+            q4 & q5 & q2\\
+            \hline
+        \end{tabular}\\
+        
+        \digraph[scale=0.7]{i3p2s2graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label= "a"];
+            q2 -> q3q4 [label="a"];
+            q3q4 -> q5 [label="a"];
+            q3q4 -> q2 [label="b"];
+            q5 -> q4 [label="b"];
+            q4 -> q5 [label="a"]
+            q4 -> q2 [label="b"];
+        } \\
+        $k_0: (q1, q3q4, q4, q5), (q2)$ \\
+        $k_1: (q1), (q3q4, q4), (q5), (q2)$ \\
+        $k_2: (q1), (q3q4, q4), (q5), (q2)$ \\
+        
+        Перестроим автомат с учётом минимальности.\\
+        \digraph[scale=0.7]{i3p2s3graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label= "a"];
+            q2 -> q3q4q4 [label="a"];
+            q3q4q4 -> q5 [label="a"];
+            q3q4q4 -> q2 [label="b"];
+            q5 -> q3q4q4 [label="b"];
+        } \\
+        
+    \item $(a+(a+b)(a+b)b)^*$
+    \\
+        \digraph[scale=0.7]{i3p3s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q1;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q1 [label = "a"];
+            q1 -> q2 [label = "a, b"]
+            q2 -> q3 [label="a, b"];
+            q3 -> q1 [label="b"];
+        } \\
+        
+        Приведем НКА к ДКА. \\
+        
+        \begin{tabular} {|c|c|c|}
+            \hline
+            &a&b \\ \hline
+            q1 & q1q2 & q2\\
+            q2 & q3 & q3\\
+            q1q2 & q1q2q3 & q2q3\\
+            q3 & & q1\\
+            q2q3 & q3 & q1q3\\
+            q1q3 & q1q2 & q1q2\\
+            q1q2q3 & q1q2q3 & q1q2q3\\ 
+            \hline
+        \end{tabular}\\
+        
+        \digraph[scale=0.7]{i3p3s2graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q1, q1q2, q1q3, q1q2q3;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q1q2 [label = "a"];
+            q1 -> q2 [label = "b"];
+            q2 -> q3 [label = "a, b"];
+            q1q2 -> q1q2q3 [label = "a"];
+            q1q2 -> q2q3 [label = "b"];
+            q3 -> q1 [label = "b"];
+            q2q3 -> q3 [label = "a"];
+            q2q3 -> q1q3 [label = "b"];
+            q1q3 -> q1q2 [label = "a, b"];
+            q1q2q3 -> q1q2q3 [label = "a, b"];
+        } \\
+        $k_0: (q2, q3, q2q3, q1q3), (q1, q1q2, q1q3, q1q2q3)$ \\
+        $k_1: (q2, q2q3), (q3), (q1q3), (q1, q1q2), (q1q3, q1q2q3)$ \\
+        $k_2: (q2), (q2q3), (q3), (q1q3), (q1), (q1q2), (q1q3), (q1q2q3)$ \\
+        Автомат минимален \\
+        
+    \item $(b+c)((ab)^*c+(ba)^*)^*$
+    \\
+        \digraph[scale=0.7]{i3p4s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2, q5, q7;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label = "b, c"];
+            q2 -> q3 [label = "a"];
+            q3 -> q4 [label = "b"];
+            q4 -> q5 [label = "c"];
+            q4 -> q3 [label = "a"];
+            q5 -> q6 [label = "b"];
+            q5 -> q3 [label = "a"]
+            q6 -> q7 [label = "a"];
+            q7 -> q6 [label = "b"];
+            q2 -> q6 [label = "b"];
+            q7 -> q3 [label = "a"];
+        } \\
+        $k_0: (q1, q3, q4, q6), (q2, q5, q7)$ \\
+        $k_1: (q1), (q3), (q4), (q6), (q2, q5, q7)$ \\
+        $k_2: (q1), (q3), (q4), (q6), (q2, q5, q7)$ \\
+        
+        Перестроим автомат с учётом минимальности. \\
+        
+        \digraph[scale=0.7]{i3p4s2graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2q5q7;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2q5q7 [label = "b, c"];
+            q2q5q7-> q3 [label = "a"];
+            q3 -> q4 [label = "b"];
+            q4 -> q2q5q7 [label = "c"];
+            q4 -> q3 [label = "a"];
+            q2q5q7 -> q6 [label = "b"];
+            q6 -> q2q5q7 [label = "a"];
+        } \\
+        
+    
+    \item $(a+b)^+(aa+bb+abab+baba)(a+b)^+$
+    \\
+        \digraph[scale=0.7]{i3p5s1graph}{
+            rankdir=LR;
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q7;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label = "a, b"];
+            q2 -> q2 [label = "a, b"];
+            q2 -> q3 [label = "a"];
+            q3 -> q4 [label = "b"];
+            q3 -> q6 [label = "a"];
+            q4 -> q5 [label = "a"];
+            q5 -> q6 [label = "b"];
+            q6 -> q7 [label = "a,b"];
+            q2 -> q8 [label = "b"];
+            q8 -> q6 [label = "b"];
+            q8-> q9 [label = "a"];
+            q9 -> q10 [label = "b"];
+            q10 -> q6 [label = "a"];
+            q7 -> q7 [label="a,b"];
+        } \\
+        Приведём НКА к ДКА.\\
+        \begin{tabular} {|c|c|c|}
+            \hline
+            &a&b \\ \hline
+            q1 & q2 & q2\\ 
+            q2 & q2q3 & q2q8\\
+            q2q3 & q2q3q6 & q2q4q8\\ 
+            q2q8 & q2q3q9 & q2q6q8\\ 
+            q2q3q6 & q2q3q6q7 & q2q4q7\\ 
+            q2q4q8 & q2q3q5q9 & q2q6q8\\ 
+            q2q3q5q9 & q2q3q6 & q2q4q6q8q10\\
+            q2q4q6q8q10 & q2q3q5q6q7q9 & q2q6q7q8\\
+            q2q3q9 & q2q3q6 & q2q4q8q10\\ 
+            q2q4q8q10 & q2q3q5q6q9 & q2q6q8\\
+            q2q3q5q6q9 & q2q3q6q7 & q2q4q6q7q8q10\\
+            q2q6q8 & q2q3q7q9 & q2q6q7q8\\ 
+            q2q3q6q7 & q2q3q6q7 & q2q4q7q8\\
+            q2q4q7 & q2q3q5q7 & q2q7q8\\
+            q2q3q7q9 & q2q3q6q7 &  q2q4q7q8q10\\
+            q2q6q7q8 & q2q3q7q9 & q2q6q7q8\\
+            q2q4q7q8 & q2q3q5q7q9 & q2q6q7q8\\
+            q2q3q5q7 & q2q3q6q7 & q2q4q6q7q8\\
+            q2q7q8 & q2q3q7q9 & q2q6q7q8\\
+            q2q4q7q8q10 & q2q3q5q6q7q9& q2q6q7q8\\
+            q2q3q5q7q9 & q2q3q6q7& q2q4q6q7q8q10\\
+            q2q4q6q7q8 & q2q3q5q7q9 & q2q6q7q8\\
+            q2q3q5q6q7q9 & q2q3q6q7& q2q4q6q7q8q10\\
+            q2q4q6q7q8q10 & q2q3q5q6q7q9 & q2q7q8q9\\
+            q2q7q8q9 & q2q3q7q9 & q2q7q8q9\\
+            \hline
+        \end{tabular}\\
+        \\
+        \digraph[scale=0.3]{i3p5s2graph}{
+            node [shape = none] start [label= < >];
+            node [shape = doublecircle] q2q3q6q7, q2q4q7, q2q3q7q9, q2q6q7q8, q2q4q7q8, q2q3q5q7, q2q7q8, q2q4q7q8q10, q2q3q5q7q9, q2q4q6q7q8, q2q3q5q6q7q9, q2q4q6q7q8q10, q2q7q8q9;
+            node [shape = circle];
+            start -> q1;
+            q1 -> q2 [label = "a, b"];
+            q2 -> q2q3 [label = "a"];
+            q2 -> q2q8 [label = "b"];
+            q2q3 -> q2q3q6 [label = "a"];
+            q2q3 -> q2q4q8 [label = "b"];
+            q2q8 -> q2q3q9 [label = "a"];
+            q2q8 -> q2q6q8 [label = "b"];
+            q2q3q6 -> q2q3q6q7 [label = "a"];
+            q2q3q6 -> q2q4q7[label = "b"];
+            q2q4q8  -> q2q3q5q9 [label = "a"];
+            q2q4q8  -> q2q6q8 [label = "b"];
+            q2q3q5q9 -> q2q3q6 [label = "a"];
+            q2q3q5q9 -> q2q4q6q8q10 [label = "b"];
+            q2q4q6q8q10 -> q2q3q5q6q7q9[label = "a"];
+            q2q4q6q8q10 -> q2q6q7q8[label = "b"];
+            q2q3q9 -> q2q3q6[label = "a"];
+            q2q3q9 -> q2q4q8q10[label = "b"];
+            q2q6q8 -> q2q3q7q9[label = "a"];
+            q2q6q8 -> q2q6q7q8[label = "b"];
+            q2q3q6q7 -> q2q3q6q7 [label = "a"];
+            q2q3q6q7 -> q2q4q7q8 [label = "b"];
+            q2q4q7 -> q2q3q5q7 [label = "a"];
+            q2q4q7 -> q2q7q8[label = "b"];
+            q2q3q7q9 -> q2q3q6q7[label = "a"];
+            q2q3q7q9 -> q2q4q7q8q10[label = "b"];
+            q2q6q7q8 -> q2q3q7q9 [label = "a"];
+            q2q6q7q8 -> q2q6q7q8 [label = "b"];
+            q2q4q7q8  -> q2q3q5q7q9[label = "a"];
+            q2q4q7q8  -> q2q6q7q8[label = "b"];
+            q2q3q5q7 -> q2q3q6q7 [label = "a"];
+            q2q3q5q7 -> q2q4q6q7q8 [label = "b"];
+            q2q7q8  -> q2q3q7q9 [label = "a"];
+            q2q7q8  -> q2q6q7q8 [label = "b"];
+            q2q4q7q8q10 -> q2q3q5q6q7q9[label = "a"];
+            q2q4q7q8q10 -> q2q6q7q8 [label = "b"];
+            q2q3q5q7q9 -> q2q3q6q7 [label = "a"];
+            q2q3q5q7q9 -> q2q4q6q7q8q10[label = "b"];
+            q2q4q6q7q8 -> q2q3q5q7q9 [label = "a"];
+            q2q4q6q7q8 -> q2q6q7q8 [label = "b"];
+            q2q3q5q6q7q9 -> q2q3q6q7 [label = "a"];
+            q2q3q5q6q7q9 -> q2q4q6q7q8q10 [label = "b"];
+            q2q4q6q7q8q10 -> q2q3q5q6q7q9 [label = "a"];
+            q2q4q6q7q8q10 -> q2q7q8q9 [label = "b"];
+            q2q7q8q9 -> q2q3q7q9 [label = "a"];
+            q2q7q8q9 -> q2q7q8q9 [label = "b"];
+            q2q4q8q10 -> q2q3q5q6q9 [label = "a"];
+            q2q4q8q10 -> q2q6q8 [label = "b"];
+            q2q3q5q6q9 -> q2q3q6q7 [label = "a"];
+            q2q3q5q6q9 -> q2q4q6q7q8q10 [label = "b"];
+        } \\
+
+        $k_0: (q1, q2, q2q3, q2q8, q2q3q6, q2q4q8, q2q3q5q9, q2q4q6q8q10, q2q3q9,  q2q4q8q10, q2q3q5q6q9, q2q6q8), \\
+        (q2q3q6q7, q2q4q7, q2q3q7q9, q2q6q7q8, q2q4q7q8, q2q3q5q7, q2q7q8, q2q4q7q8q10, q2q3q5q7q9, q2q4q6q7q8, \\
+        q2q3q5q6q7q9, q2q4q6q7q8q10, q2q7q8q9)$ \\
+        $k_1: (q1, q2), (q2q8), (q2q3q5q9, q2q3q9, q2q3, q2q4q8,),(q2q3q6, q2q3q5q6q9, q2q6q8, q2q4q6q8q10), \\
+        (q2q3q6q7, q2q4q7, q2q3q7q9, q2q6q7q8, q2q4q7q8, q2q3q5q7, q2q7q8, q2q4q7q8q10, q2q3q5q7q9, q2q4q6q7q8, \\
+        q2q3q5q6q7q9, q2q4q6q7q8q10, q2q7q8q9)$\\
+        $k_2: (q1), (q2), (q2q8), (q2q3q5q9, q2q3q9, q2q3, q2q4q8,),(q2q3q6, q2q3q5q6q9, q2q6q8, q2q4q6q8q10), \\
+        (q2q3q6q7, q2q4q7, q2q3q7q9, q2q6q7q8, q2q4q7q8, q2q3q5q7, q2q7q8, q2q4q7q8q10, q2q3q5q7q9, q2q4q6q7q8, \\
+        q2q3q5q6q7q9, q2q4q6q7q8q10, q2q7q8q9)$\\
+\end{enumerate}
+
+
+\section{Задание №4. Определить является ли язык регулярным или нет}
+Ответом на данное задание является конечный автомат, если язык регулярный, либо доказательство нерегулярности языка при помощи леммы о разрастании.
+\begin{enumerate}
+    \item $L=\{(aab)^n b(aba)^m \ | \ n \geq 0, m \geq 0\}$
+    \\
+    Язык регулярный \\ 
+    \digraph[scale=0.7]{i4p1graph}{
+        rankdir=LR;
+        node [shape = none] start [label= < >];
+        node [shape = doublecircle] q5, q8;
+        node [shape = circle];
+        start -> q1;
+        q1 -> q2 [label = "a"];
+        q2 -> q3 [label = "a"];
+        q3 -> q4 [label = "b"];
+        q4 -> q2 [label = "a"];
+        q4 -> q5 [label = "b"];
+        q1 -> q5 [label = "b"];
+        q5 -> q6 [label = "a"];
+        q6 -> q7 [label = "b"];
+        q7 -> q8 [label = "a"];
+        q8 -> q5 [label = "a"];
+    } \\
+    
+    
+    \item $L=\{uaav \ | \ u \in \{a,b\}^*, v \in \{a,b\}^*, \left| u \right|_b \geq  \left| v \right|_a\}$\\
+    $w=b^naaa^n$\\
+    $x=b^i$ \\
+    $y=b^j,\ i+j < n, \ j>0$\\
+    $z=b^{n-i-j}aaa^n$\\
+    $w=xy^kz$ \\
+    При $l=0 \quad w=b^{n-j}aaa^n \notin L \Rightarrow $ язык нерегулярный\\
+    
+    \item $L=\{ a^m w \ | \ w \in \{a, b\}^*, 1 \leq \left| w \right|_b \leq m\}$
+    \\
+    $w = a^n b^n, \ |w| \geq n$\\
+    $x = a^i, \ |xy| \leq n, \ i \geq 0,\ j > 0$\\
+    $y = a^j$\\
+    $z = a^{n-i-j}b^n$\\
+    При $l=0 \quad w=a^{n-j}b^n \notin L \Rightarrow $ язык нерегулярный\\
+    
+    \item $L=\{a^k b^m a^n \ | \  k=n \lor m>0\}$
+    \\
+    $w = a^n b a^n, \ |w| \geq n$ \\
+    $x = a^i, \ |xy| \leq n  => i + j \leq n,\; j > 0$\\
+    $y = a^j$\\
+    $z = a^{n-i-j}ba^n$\\
+    При $k = 2 \quad xy^2z = a^ia^{2j}a^{n-i-j}ba^n = a^{n+j}ba^n \notin L\Rightarrow $ язык нерегулярный\\
+    
+    \item $L=\{ucv \ | \ u \in \{a,b\}^*, v \in \{a,b\}^*, u\neq v^R  \}$
+    \\
+    $w = (ab)^nc(ab)^n, \ |w| \geq n$\\
+    $x = \alpha_1\alpha_2...\alpha_i, \ |xy| \leq n, \  i+j \leq n, \ j \neq 0 $ \\
+    $y = \alpha_{i+1}\alpha_{i+2}...\alpha_{i+j}$ \\
+    $z = \alpha_{i+j+1}\alpha_{i+j+2}...\alpha_{2n} c(ab)^n$\\
+    При $k = 2 \quad  xy^2z(\alpha_1\alpha_2...\alpha_i)(\alpha_{i+1}\alpha_{i+2}...\alpha_{i+j})^2(\alpha_{i+j+1}\alpha_{i+j+2}...\alpha_{2n} c (ab)^n) \notin L \Rightarrow $ язык нерегулярный\\
+    
+\end{enumerate}
+
+
+\section{Задание №5. Реализовать алгоритмы}
+Ответом на данное задание является работающая программа на выбранном языке программирования, покрытая юнит-тестами. \\
+
+В рамках своего выполнения программма должна генерировать текстовый документ с картинками, показывающий процесс построения автомата (к примеру Markdown с графиками на Graphiz).\\
+\begin{enumerate}
+    \item Построение ДКА по НКА с 
+    $\lambda$-переходами.
+    \item Прямое произведение языков, с возможностью построить пересечение, объединение и разность.
+\end{enumerate}
+\end{document}
